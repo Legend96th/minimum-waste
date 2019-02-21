@@ -1,6 +1,6 @@
 class Stick: # Representing a stick, each stick may be composed of sub-sticks
     def __init__(self, size=12):
-        self.size=int(size)
+        self.size=float(size)
         self.composed=[]
         self.sum=0
     def __eq__(self, bar):
@@ -10,7 +10,7 @@ class Stick: # Representing a stick, each stick may be composed of sub-sticks
             return False
         for i in c1:
             try:
-                if c1[int(i)]!=c2[int(i)]:
+                if c1[float(i)]!=c2[float(i)]:
                     return False
             except:
                 return False
@@ -19,7 +19,7 @@ class Stick: # Representing a stick, each stick may be composed of sub-sticks
     def count(self):
         tmp = []
         for i in self.composed:
-            tmp.append(int(i.size))
+            tmp.append(float(i.size))
         tmp_set = list(set(tmp))
         tmp_count = {}
         for i in tmp_set:
@@ -64,7 +64,7 @@ class SetStick:
         self.lost=0
         self.need=0
         for i in needs:
-            self.need+=int(i)
+            self.need+=float(i)
         self.sticks=[]
 
     def add(self, stick):
@@ -113,21 +113,39 @@ class SetStick:
 def create_set(needs, max_sizes): # Create a set from a list of need and the list of what the crafter have
     se_t=SetStick()
     everything, last_everything, rest, max_sizes = combinations(needs, max_sizes)
+    boost={}
     for i in everything:
-        s=Stick(size=0)
+        summ=0
         for j in i:
-            s+=Stick(size=j)
-        se_t.add(s)
-    for i in last_everything:
-        s=Stick(size=i)
-        for j in last_everything[i]:
-            s2=Stick(size=j)
-            s.add(s2)
-        se_t.add(s)
-    se_t.pprint()
+            summ+=j
+        try:
+            boost[summ].append(i)
+        except:
+            boost[summ]=[]
+            boost[summ].append(i)
+    lost=0
+    for j in last_everything:
+        actual=float(j)
+        summ=0
+        for i in last_everything[j]:
+            for k in i:
+                summ+=float(k)
+        lost+=j-summ
+
+    print("Non Optimized Part")
+    print(str(last_everything))
+#    se_t.pprint()
+    print("Optimized Part")
+    print(str(boost))
     se_t.needs=rest
     se_t.max_sizes=max_sizes
-    print("lost : "+str(se_t.evaluate_lost()))
+    print("lost : "+str(lost))
+    f=open("cuts","w")
+    f.write("Non Optimized Part\n")
+    f.write(str(last_everything)+"\n")
+    f.write("Optimized Part"+"\n")
+    f.write(str(boost)+"\n")
+    f.write("lost : "+str(lost)+"\n")
     return se_t
 
 def get_max(max_sizes): # Get the biggest avaiable stick from the crafter
@@ -182,7 +200,11 @@ def combinations(needs, max_sizes):
         for b in lek:
             needs.remove(b)
         max_sizes[maxi]-=1
-        last_everything[maxi]=(s)
+        try:
+            last_everything[maxi].append(s)
+        except:
+            last_everything[maxi]=[]
+            last_everything[maxi].append(s)
         maxi=get_max(max_sizes)
     
     return everything, last_everything, needs, max_sizes
@@ -220,18 +242,21 @@ def parse_file(file="needs"): # Read a file from where it gets inputs
     max_sizes={}
     for i in mar2:
         g=i.split(":")
-        max_sizes[int(g[0])]=int(g[1])
+        try:
+            max_sizes[float(g[0])]=float(g[1])
+        except:
+            max_sizes[float(g[0])]=[]
+            max_sizes[float(g[0])]=float(g[1])
     neer=r[1].split('=')[1]
     mar2=neer.split(';')
     br={}
     needs=[]
     for i in mar2:
         g=i.split(":")
-        br[int(g[0])]=int(g[1])
+        br[float(g[0])]=float(g[1])
     for j in br:
-        needs+=[j]*br[j]
+        needs+=[j]*int(br[j])
     return max_sizes, needs
 
 max_sizes, needs=parse_file()
 se_t= create_set(needs, max_sizes)
-se_t.write("cuts")

@@ -21,7 +21,7 @@ Then finally just :
 ```
 python3 main.py
 ```
-And you will the optimized stick architecture, the client loss..ect in the "cuts" file.
+And you will get the optimized stick architecture, the client loss..ect in the "cuts" file.
 
 ------
 License: [CC-BY-NC](https://creativecommons.org/licenses/by-nc/4.0/)
